@@ -8,10 +8,11 @@ description: Sets a custom player count in the server list.
 commands:
   pcd:
     description: Main command for PlayerCustomDisplay.
-    usage: /pcd set <number>
+    # --- MODIFIED USAGE ---
+    usage: /pcd <set|stat>
     permission: playercustomdisplay.admin
 
 permissions:
   playercustomdisplay.admin:
-    description: Allows setting the custom player count.
+    description: Allows using the PCD commands.
     default: op

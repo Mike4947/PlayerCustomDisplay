@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-// The class now implements TabCompleter as well as CommandExecutor
 public class PCDCommand implements CommandExecutor, TabCompleter {
 
     private final main plugin;
@@ -25,40 +24,72 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        // --- RESTRUCTURED LOGIC ---
+
         if (!sender.hasPermission("playercustomdisplay.admin")) {
             sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
             return true;
         }
 
-        if (args.length < 2 || !args[0].equalsIgnoreCase("set")) {
-            sender.sendMessage(ChatColor.RED + "Usage: /pcd set <number>");
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.RED + "Usage: /pcd <set|stat>");
             return true;
         }
 
-        try {
-            int newBaseCount = Integer.parseInt(args[1]);
-            plugin.setCustomPlayerCount(newBaseCount);
-            // --- MODIFIED MESSAGE ---
-            sender.sendMessage(ChatColor.GREEN + "Base player count has been set to: " + newBaseCount);
-            sender.sendMessage(ChatColor.GRAY + "The number in the server list will be this value plus the online player count.");
-            if (newBaseCount < 0) {
-                sender.sendMessage(ChatColor.YELLOW + "A number less than 0 disables the dynamic player count feature.");
+        // Handle "/pcd set <number>"
+        if (args[0].equalsIgnoreCase("set")) {
+            if (args.length < 2) {
+                sender.sendMessage(ChatColor.RED + "Usage: /pcd set <number>");
+                return true;
             }
-        } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "Invalid number provided. Please enter a valid integer.");
+            try {
+                int newBaseCount = Integer.parseInt(args[1]);
+                plugin.setCustomPlayerCount(newBaseCount);
+                sender.sendMessage(ChatColor.GREEN + "Base player count has been set to: " + newBaseCount);
+                sender.sendMessage(ChatColor.GRAY + "The number in the server list will be this value plus the online player count.");
+                if (newBaseCount < 0) {
+                    sender.sendMessage(ChatColor.YELLOW + "A number less than 0 disables the dynamic player count feature.");
+                }
+            } catch (NumberFormatException e) {
+                sender.sendMessage(ChatColor.RED + "Invalid number provided. Please enter a valid integer.");
+            }
+            return true;
         }
 
+        // --- NEW: Handle "/pcd stat" ---
+        if (args[0].equalsIgnoreCase("stat")) {
+            int baseCount = plugin.getCustomPlayerCount();
+            int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
+
+            sender.sendMessage(ChatColor.GOLD + "--- PlayerCustomDisplay Stats ---");
+            if (baseCount < 0) {
+                sender.sendMessage(ChatColor.YELLOW + "Feature Status: " + ChatColor.RED + "Disabled");
+                sender.sendMessage(ChatColor.AQUA + "Real Player Count: " + ChatColor.WHITE + onlinePlayers);
+            } else {
+                int dynamicCount = baseCount + onlinePlayers;
+                sender.sendMessage(ChatColor.YELLOW + "Feature Status: " + ChatColor.GREEN + "Enabled");
+                sender.sendMessage(ChatColor.AQUA + "Base Player Count: " + ChatColor.WHITE + baseCount);
+                sender.sendMessage(ChatColor.AQUA + "Actual Online Players: " + ChatColor.WHITE + onlinePlayers);
+                sender.sendMessage(ChatColor.AQUA + "Displayed Player Count: " + ChatColor.WHITE + dynamicCount);
+            }
+            return true;
+        }
+
+        // Fallback for unknown subcommands
+        sender.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /pcd <set|stat>");
         return true;
     }
 
-    // --- Tab completion method remains the same ---
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         final List<String> completions = new ArrayList<>();
 
+        // Logic for the first argument (e.g., /pcd <HERE>)
         if (args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], Collections.singletonList("set"), completions);
+            // --- UPDATED to include "stat" ---
+            StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "stat"), completions);
         }
+        // Logic for the second argument (e.g., /pcd set <HERE>)
         else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
             StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "1000", "-1"), completions);
         }
