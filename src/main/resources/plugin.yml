@@ -1,0 +1,8 @@
+name: PlayerCustomDisplay
+version: 'v1.0'
+main: com.example.pcd.main
+api-version: '1.21'
+prefix: PLAYER-CUSTOM-DISPLAY
+load: STARTUP
+authors: [ Mike4947 ]
+description: A plugin to customize the player count in the multiplayer menu
