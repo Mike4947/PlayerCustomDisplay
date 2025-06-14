@@ -1,8 +1,17 @@
 name: PlayerCustomDisplay
-version: 'v1.0'
+version: '1.0'
 main: com.example.pcd.main
 api-version: '1.21'
-prefix: PLAYER-CUSTOM-DISPLAY
-load: STARTUP
 authors: [ Mike4947 ]
-description: A plugin to customize the player count in the multiplayer menu
+description: Sets a custom player count in the server list.
+
+commands:
+  pcd:
+    description: Main command for PlayerCustomDisplay.
+    usage: /pcd set <number>
+    permission: playercustomdisplay.admin
+
+permissions:
+  playercustomdisplay.admin:
+    description: Allows setting the custom player count.
+    default: op
