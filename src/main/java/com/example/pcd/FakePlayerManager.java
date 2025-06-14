@@ -1,19 +1,15 @@
 package com.example.pcd;
 
-// --- Imports for ProtocolLib ---
-import com.comphenix.protocol.PacketType; // <--- MISSING IMPORT ADDED
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.*; // <--- Using wildcard to include WrappedSignedProperty
-
-// --- Imports for Paper/Bukkit API ---
+import com.comphenix.protocol.wrappers.*;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-// --- Standard Java Imports ---
 import java.util.*;
 
 public class FakePlayerManager {
@@ -38,15 +34,9 @@ public class FakePlayerManager {
     }
 
     public void updateFakePlayers(int count) {
-        // 1. REMOVE old fake players using the modern REMOVE packet
+        // Remove old players using the legacy REMOVE_PLAYER action
         if (!fakePlayers.isEmpty()) {
-            PacketContainer removePacket = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO_REMOVE);
-            List<UUID> removeUuids = new ArrayList<>();
-            for (WrappedGameProfile profile : fakePlayers) {
-                removeUuids.add(profile.getUUID());
-            }
-            removePacket.getUUIDLists().write(0, removeUuids);
-            broadcastPacket(removePacket);
+            broadcastPacket(createPlayerPacket(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER, fakePlayers));
         }
 
         fakePlayers.clear();
@@ -55,41 +45,23 @@ public class FakePlayerManager {
             return;
         }
 
-        // 2. CREATE new fake player data
+        // Create new players
         for (int i = 0; i < count; i++) {
             fakePlayers.add(createRandomGameProfile());
         }
 
-        // 3. ADD new fake players using the modern UPDATE packet
-        PacketContainer addPacket = createAddPlayerPacket(fakePlayers);
-        broadcastPacket(addPacket);
+        // Add new players using the legacy ADD_PLAYER action
+        broadcastPacket(createPlayerPacket(EnumWrappers.PlayerInfoAction.ADD_PLAYER, fakePlayers));
     }
 
     public void sendPlayersTo(Player player) {
         if (!fakePlayers.isEmpty()) {
             try {
-                protocolManager.sendServerPacket(player, createAddPlayerPacket(fakePlayers));
+                protocolManager.sendServerPacket(player, createPlayerPacket(EnumWrappers.PlayerInfoAction.ADD_PLAYER, fakePlayers));
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to send fake player packet to " + player.getName());
             }
         }
-    }
-
-    private PacketContainer createAddPlayerPacket(List<WrappedGameProfile> profiles) {
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO_UPDATE);
-        packet.getPlayerInfoActions().write(0, EnumSet.of(EnumWrappers.PlayerInfoAction.ADD_PLAYER));
-
-        List<PlayerInfoData> dataList = new ArrayList<>();
-        for (WrappedGameProfile profile : profiles) {
-            dataList.add(new PlayerInfoData(
-                    profile,
-                    random.nextInt(100) + 20, // Ping
-                    EnumWrappers.NativeGameMode.SURVIVAL,
-                    WrappedChatComponent.fromText(profile.getName())
-            ));
-        }
-        packet.getPlayerInfoDataLists().write(0, dataList);
-        return packet;
     }
 
     private WrappedGameProfile createRandomGameProfile() {
@@ -114,6 +86,24 @@ public class FakePlayerManager {
             }
         }
         return newProfile;
+    }
+
+    // This method now uses the legacy PacketType.Play.Server.PLAYER_INFO
+    private PacketContainer createPlayerPacket(EnumWrappers.PlayerInfoAction action, List<WrappedGameProfile> profiles) {
+        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
+        packet.getPlayerInfoAction().write(0, action);
+
+        List<PlayerInfoData> dataList = new ArrayList<>();
+        for (WrappedGameProfile profile : profiles) {
+            dataList.add(new PlayerInfoData(
+                    profile,
+                    random.nextInt(100) + 20,
+                    EnumWrappers.NativeGameMode.SURVIVAL,
+                    WrappedChatComponent.fromText(profile.getName())
+            ));
+        }
+        packet.getPlayerInfoDataLists().write(0, dataList);
+        return packet;
     }
 
     private void broadcastPacket(PacketContainer packet) {
