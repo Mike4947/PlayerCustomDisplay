@@ -1,14 +1,14 @@
 name: PlayerCustomDisplay
 version: '1.0'
 main: com.example.pcd.main
-api-version: '1.21'
+api-version: '1.21.5'
+depend: [ProtocolLib]
 authors: [ Mike4947 ]
 description: Sets a custom player count in the server list.
 
 commands:
   pcd:
     description: Main command for PlayerCustomDisplay.
-    # --- MODIFIED USAGE ---
     usage: /pcd <set|stat>
     permission: playercustomdisplay.admin
 
