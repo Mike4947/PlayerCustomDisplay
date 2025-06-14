@@ -2,5 +2,4 @@
 
 # Set the number to display in the server list.
 # Set to -1 to disable this feature and show the real player count.
-# For exemple, I set 'custom-player-count' to 200.
-custom-player-count: 200
+custom-player-count: -1
