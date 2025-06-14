@@ -11,6 +11,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class FakePlayerManager {
 
@@ -34,32 +35,41 @@ public class FakePlayerManager {
     }
 
     public void updateFakePlayers(int count) {
-        // Remove old players using the legacy REMOVE_PLAYER action
+        // --- ADDED LOGGING ---
+        plugin.getLogger().info("Received request to update fake players to a count of: " + count);
+
         if (!fakePlayers.isEmpty()) {
+            plugin.getLogger().info("Removing " + fakePlayers.size() + " existing fake players...");
             broadcastPacket(createPlayerPacket(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER, fakePlayers));
+            plugin.getLogger().info("...Removal packet sent.");
         }
 
         fakePlayers.clear();
 
         if (count <= 0) {
+            plugin.getLogger().info("Count is " + count + ", no new players will be added.");
             return;
         }
 
-        // Create new players
+        plugin.getLogger().info("Generating " + count + " new fake player profiles...");
         for (int i = 0; i < count; i++) {
             fakePlayers.add(createRandomGameProfile());
         }
+        plugin.getLogger().info("...Generated " + fakePlayers.size() + " profiles.");
 
-        // Add new players using the legacy ADD_PLAYER action
+        plugin.getLogger().info("Sending ADD_PLAYER packet for new fake players...");
         broadcastPacket(createPlayerPacket(EnumWrappers.PlayerInfoAction.ADD_PLAYER, fakePlayers));
+        plugin.getLogger().info("...ADD_PLAYER packet sent.");
     }
 
     public void sendPlayersTo(Player player) {
         if (!fakePlayers.isEmpty()) {
             try {
+                plugin.getLogger().info("Sending fake player list to joining player: " + player.getName());
                 protocolManager.sendServerPacket(player, createPlayerPacket(EnumWrappers.PlayerInfoAction.ADD_PLAYER, fakePlayers));
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to send fake player packet to " + player.getName());
+                // --- IMPROVED ERROR LOGGING ---
+                plugin.getLogger().log(Level.SEVERE, "Could not send fake player packet to " + player.getName(), e);
             }
         }
     }
@@ -88,7 +98,6 @@ public class FakePlayerManager {
         return newProfile;
     }
 
-    // This method now uses the legacy PacketType.Play.Server.PLAYER_INFO
     private PacketContainer createPlayerPacket(EnumWrappers.PlayerInfoAction action, List<WrappedGameProfile> profiles) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         packet.getPlayerInfoAction().write(0, action);
@@ -107,11 +116,13 @@ public class FakePlayerManager {
     }
 
     private void broadcastPacket(PacketContainer packet) {
+        plugin.getLogger().info("Broadcasting packet to " + plugin.getServer().getOnlinePlayers().size() + " players.");
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             try {
                 protocolManager.sendServerPacket(player, packet);
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to send fake player packet to " + player.getName());
+                // --- IMPROVED ERROR LOGGING ---
+                plugin.getLogger().log(Level.SEVERE, "Could not broadcast fake player packet to " + player.getName(), e);
             }
         }
     }

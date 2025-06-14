@@ -6,7 +6,7 @@
 
     <groupId>com.example.pcd</groupId>
     <artifactId>playercustomdisplay</artifactId>
-    <version>v0.0.6-beta-build.7</version>
+    <version>v0.0.6-beta-build.9</version>
     <packaging>jar</packaging>
 
     <name>playercustomdisplay</name>
