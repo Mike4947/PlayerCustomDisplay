@@ -1,18 +1,19 @@
 package com.example.pcd;
 
-import com.comphenix.protocol.PacketType;
+// --- Imports for ProtocolLib ---
+import com.comphenix.protocol.PacketType; // <--- MISSING IMPORT ADDED
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.*; // <--- Using wildcard to include WrappedSignedProperty
+
+// --- Imports for Paper/Bukkit API ---
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+// --- Standard Java Imports ---
 import java.util.*;
 
 public class FakePlayerManager {
@@ -36,7 +37,6 @@ public class FakePlayerManager {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    // --- METHOD COMPLETELY REWRITTEN ---
     public void updateFakePlayers(int count) {
         // 1. REMOVE old fake players using the modern REMOVE packet
         if (!fakePlayers.isEmpty()) {
@@ -65,7 +65,6 @@ public class FakePlayerManager {
         broadcastPacket(addPacket);
     }
 
-    // --- METHOD REWRITTEN ---
     public void sendPlayersTo(Player player) {
         if (!fakePlayers.isEmpty()) {
             try {
@@ -76,16 +75,12 @@ public class FakePlayerManager {
         }
     }
 
-    // --- NEW HELPER METHOD ---
     private PacketContainer createAddPlayerPacket(List<WrappedGameProfile> profiles) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO_UPDATE);
-
-        // Set the packet to perform the ADD_PLAYER action
         packet.getPlayerInfoActions().write(0, EnumSet.of(EnumWrappers.PlayerInfoAction.ADD_PLAYER));
 
         List<PlayerInfoData> dataList = new ArrayList<>();
         for (WrappedGameProfile profile : profiles) {
-            // The constructor for PlayerInfoData has changed in modern versions
             dataList.add(new PlayerInfoData(
                     profile,
                     random.nextInt(100) + 20, // Ping
