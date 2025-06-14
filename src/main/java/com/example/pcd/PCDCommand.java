@@ -24,8 +24,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        // --- RESTRUCTURED LOGIC ---
-
         if (!sender.hasPermission("playercustomdisplay.admin")) {
             sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
             return true;
@@ -36,7 +34,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Handle "/pcd set <number>"
         if (args[0].equalsIgnoreCase("set")) {
             if (args.length < 2) {
                 sender.sendMessage(ChatColor.RED + "Usage: /pcd set <number>");
@@ -56,7 +53,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // --- NEW: Handle "/pcd stat" ---
         if (args[0].equalsIgnoreCase("stat")) {
             int baseCount = plugin.getCustomPlayerCount();
             int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
@@ -75,7 +71,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Fallback for unknown subcommands
         sender.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /pcd <set|stat>");
         return true;
     }
@@ -84,12 +79,9 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         final List<String> completions = new ArrayList<>();
 
-        // Logic for the first argument (e.g., /pcd <HERE>)
         if (args.length == 1) {
-            // --- UPDATED to include "stat" ---
             StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "stat"), completions);
         }
-        // Logic for the second argument (e.g., /pcd set <HERE>)
         else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
             StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "1000", "-1"), completions);
         }

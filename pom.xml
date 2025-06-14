@@ -6,10 +6,10 @@
 
     <groupId>com.example.pcd</groupId>
     <artifactId>playercustomdisplay</artifactId>
-    <version>v0.0.6-beta-build.9</version>
+    <version>v0.0.6-build.1</version>
     <packaging>jar</packaging>
 
-    <name>playercustomdisplay</name>
+    <name>PlayerCustomDisplay</name>
 
     <properties>
         <java.version>21</java.version>
@@ -59,14 +59,6 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
-        <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/repository/public/</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -74,13 +66,6 @@
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.21.5-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.dmulloy2</groupId>
-            <artifactId>ProtocolLib</artifactId>
-            <version>5.2.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
