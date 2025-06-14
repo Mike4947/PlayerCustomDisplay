@@ -36,11 +36,13 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         }
 
         try {
-            int newPlayerCount = Integer.parseInt(args[1]);
-            plugin.setCustomPlayerCount(newPlayerCount);
-            sender.sendMessage(ChatColor.GREEN + "Custom player count has been set to: " + newPlayerCount);
-            if (newPlayerCount < 0) {
-                sender.sendMessage(ChatColor.YELLOW + "A number less than 0 disables the feature.");
+            int newBaseCount = Integer.parseInt(args[1]);
+            plugin.setCustomPlayerCount(newBaseCount);
+            // --- MODIFIED MESSAGE ---
+            sender.sendMessage(ChatColor.GREEN + "Base player count has been set to: " + newBaseCount);
+            sender.sendMessage(ChatColor.GRAY + "The number in the server list will be this value plus the online player count.");
+            if (newBaseCount < 0) {
+                sender.sendMessage(ChatColor.YELLOW + "A number less than 0 disables the dynamic player count feature.");
             }
         } catch (NumberFormatException e) {
             sender.sendMessage(ChatColor.RED + "Invalid number provided. Please enter a valid integer.");
@@ -49,23 +51,18 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // --- NEW METHOD FOR TAB COMPLETION ---
+    // --- Tab completion method remains the same ---
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         final List<String> completions = new ArrayList<>();
 
-        // Logic for the first argument (e.g., /pcd <HERE>)
         if (args.length == 1) {
-            // Find all subcommands that start with what the user has typed so far.
             StringUtil.copyPartialMatches(args[0], Collections.singletonList("set"), completions);
         }
-        // Logic for the second argument (e.g., /pcd set <HERE>)
         else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
-            // Suggest some helpful example numbers.
             StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "1000", "-1"), completions);
         }
 
-        // Sort the suggestions alphabetically and return them.
         Collections.sort(completions);
         return completions;
     }
