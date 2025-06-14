@@ -1,14 +1,22 @@
-package com.example.pcd; // <-- Updated package
+package com.example.pcd;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class PCDCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-    // Now correctly refers to the 'main' class
+// The class now implements TabCompleter as well as CommandExecutor
+public class PCDCommand implements CommandExecutor, TabCompleter {
+
     private final main plugin;
 
     public PCDCommand(main plugin) {
@@ -39,5 +47,26 @@ public class PCDCommand implements CommandExecutor {
         }
 
         return true;
+    }
+
+    // --- NEW METHOD FOR TAB COMPLETION ---
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        final List<String> completions = new ArrayList<>();
+
+        // Logic for the first argument (e.g., /pcd <HERE>)
+        if (args.length == 1) {
+            // Find all subcommands that start with what the user has typed so far.
+            StringUtil.copyPartialMatches(args[0], Collections.singletonList("set"), completions);
+        }
+        // Logic for the second argument (e.g., /pcd set <HERE>)
+        else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
+            // Suggest some helpful example numbers.
+            StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "1000", "-1"), completions);
+        }
+
+        // Sort the suggestions alphabetically and return them.
+        Collections.sort(completions);
+        return completions;
     }
 }

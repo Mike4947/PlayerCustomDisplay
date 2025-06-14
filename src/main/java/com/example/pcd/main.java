@@ -1,8 +1,7 @@
-package com.example.pcd; // <-- Updated package
+package com.example.pcd;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-// The class name is now 'main' to match your plugin.yml
 public final class main extends JavaPlugin {
 
     private int customPlayerCount = -1;
@@ -12,7 +11,13 @@ public final class main extends JavaPlugin {
         saveDefaultConfig();
         loadPlayerCount();
 
-        getCommand("pcd").setExecutor(new PCDCommand(this));
+        // --- UPDATED COMMAND REGISTRATION ---
+        // We create one instance of our command class
+        PCDCommand pcdCommand = new PCDCommand(this);
+        // We tell the server that this instance will handle BOTH execution and tab completion
+        getCommand("pcd").setExecutor(pcdCommand);
+        getCommand("pcd").setTabCompleter(pcdCommand);
+
         getServer().getPluginManager().registerEvents(new ServerListListener(this), this);
 
         getLogger().info("PlayerCustomDisplay has been enabled!");
