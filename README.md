@@ -21,7 +21,7 @@ PlayerCustomDisplay goes beyond just setting a static fake player count. It allo
 ## ⚙️ Installation
 
 1.  Download the latest release from the [Releases page](https://github.com/Mike4947/PlayerCustomDisplay/releases).
-2.  Place the `PlayerCustomDisplay.jar` file into your server's `plugins` folder.
+2.  Place the `PlayerCustomDisplay v.X.X.X.jar` file into your server's `plugins` folder.
 3.  Restart your server.
 
 ## ⌨️ Commands & Permissions
