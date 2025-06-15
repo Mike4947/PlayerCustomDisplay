@@ -2,6 +2,8 @@
 
 A simple, lightweight Spigot/Paper plugin that allows server owners to display a dynamic, custom player count in the Minecraft server list.
 
+<img src="https://img.shields.io/github/downloads/Mike4947/playercustomdisplay/total?style=for-the-badge&color=2196F3" alt="Total Downloads"/>
+
 ## 📖 Description
 
 PlayerCustomDisplay goes beyond just setting a static fake player count. It allows you to set a "base" number, and the plugin will dynamically add the current number of online players to it. This creates a realistic and lively player count that changes as players join and leave your server.
