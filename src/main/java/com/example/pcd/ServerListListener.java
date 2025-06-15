@@ -14,12 +14,18 @@ public class ServerListListener implements Listener {
 
     @EventHandler
     public void onServerListPing(PaperServerListPingEvent event) {
+        // Handle custom online player count
         int baseCount = plugin.getCustomPlayerCount();
-
         if (baseCount >= 0) {
             int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
             int dynamicPlayerCount = baseCount + onlinePlayers;
             event.setNumPlayers(dynamicPlayerCount);
+        }
+
+        // --- NEW: Handle custom max player count ---
+        int maxCount = plugin.getCustomMaxPlayers();
+        if (maxCount >= 0) {
+            event.setMaxPlayers(maxCount);
         }
     }
 }

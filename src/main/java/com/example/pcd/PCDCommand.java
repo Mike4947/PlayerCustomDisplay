@@ -30,49 +30,68 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: /pcd <set|stat>");
+            sender.sendMessage(ChatColor.RED + "Usage: /pcd <set|setmax|stat>");
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("set")) {
-            if (args.length < 2) {
-                sender.sendMessage(ChatColor.RED + "Usage: /pcd set <number>");
-                return true;
-            }
-            try {
-                int newBaseCount = Integer.parseInt(args[1]);
-                plugin.setCustomPlayerCount(newBaseCount);
-                sender.sendMessage(ChatColor.GREEN + "Base player count has been set to: " + newBaseCount);
-                sender.sendMessage(ChatColor.GRAY + "The number in the server list will be this value plus the online player count.");
-                if (newBaseCount < 0) {
-                    sender.sendMessage(ChatColor.YELLOW + "A number less than 0 disables the dynamic player count feature.");
+        String subCommand = args[0].toLowerCase();
+
+        switch (subCommand) {
+            case "set":
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /pcd set <number>");
+                    return true;
                 }
-            } catch (NumberFormatException e) {
-                sender.sendMessage(ChatColor.RED + "Invalid number provided. Please enter a valid integer.");
-            }
-            return true;
+                try {
+                    int newBaseCount = Integer.parseInt(args[1]);
+                    plugin.setCustomPlayerCount(newBaseCount);
+                    sender.sendMessage(ChatColor.GREEN + "Base player count has been set to: " + newBaseCount);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ChatColor.RED + "Invalid number provided.");
+                }
+                return true;
+
+            // --- NEW: Handle the "setmax" subcommand ---
+            case "setmax":
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /pcd setmax <number>");
+                    return true;
+                }
+                try {
+                    int newMaxCount = Integer.parseInt(args[1]);
+                    plugin.setCustomMaxPlayers(newMaxCount);
+                    sender.sendMessage(ChatColor.GREEN + "Custom max player count has been set to: " + newMaxCount);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ChatColor.RED + "Invalid number provided.");
+                }
+                return true;
+
+            case "stat":
+                int baseCount = plugin.getCustomPlayerCount();
+                int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
+                // Also get the max players for the stat display
+                int maxPlayers = plugin.getCustomMaxPlayers();
+
+
+                sender.sendMessage(ChatColor.GOLD + "--- PlayerCustomDisplay Stats ---");
+                if (baseCount < 0) {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom online count: " + ChatColor.RED + "Disabled");
+                } else {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom online count: " + ChatColor.GREEN + "Enabled");
+                    sender.sendMessage(ChatColor.AQUA + "  Displayed: " + ChatColor.WHITE + (baseCount + onlinePlayers) + ChatColor.GRAY + " (Base: " + baseCount + " + Online: " + onlinePlayers + ")");
+                }
+
+                if (maxPlayers < 0) {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom max players: " + ChatColor.RED + "Disabled");
+                } else {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom max players: " + ChatColor.GREEN + "Enabled" + ChatColor.AQUA + " -> " + ChatColor.WHITE + maxPlayers);
+                }
+                return true;
+
+            default:
+                sender.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /pcd <set|setmax|stat>");
+                return true;
         }
-
-        if (args[0].equalsIgnoreCase("stat")) {
-            int baseCount = plugin.getCustomPlayerCount();
-            int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
-
-            sender.sendMessage(ChatColor.GOLD + "--- PlayerCustomDisplay Stats ---");
-            if (baseCount < 0) {
-                sender.sendMessage(ChatColor.YELLOW + "Feature Status: " + ChatColor.RED + "Disabled");
-                sender.sendMessage(ChatColor.AQUA + "Real Player Count: " + ChatColor.WHITE + onlinePlayers);
-            } else {
-                int dynamicCount = baseCount + onlinePlayers;
-                sender.sendMessage(ChatColor.YELLOW + "Feature Status: " + ChatColor.GREEN + "Enabled");
-                sender.sendMessage(ChatColor.AQUA + "Base Player Count: " + ChatColor.WHITE + baseCount);
-                sender.sendMessage(ChatColor.AQUA + "Actual Online Players: " + ChatColor.WHITE + onlinePlayers);
-                sender.sendMessage(ChatColor.AQUA + "Displayed Player Count: " + ChatColor.WHITE + dynamicCount);
-            }
-            return true;
-        }
-
-        sender.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /pcd <set|stat>");
-        return true;
     }
 
     @Override
@@ -80,10 +99,11 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         final List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "stat"), completions);
+            // --- NEW: Add "setmax" to tab completion ---
+            StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "setmax", "stat"), completions);
         }
-        else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
-            StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "1000", "-1"), completions);
+        else if (args.length == 2 && (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setmax"))) {
+            StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "-1"), completions);
         }
 
         Collections.sort(completions);

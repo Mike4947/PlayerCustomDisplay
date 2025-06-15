@@ -1,6 +1,9 @@
 # PlayerCustomDisplay Configuration
 
 # Set the base number to be added to the real player count for the server list.
-# For example, if this is set to 200 and 5 players are online, the list will show 205.
 # Set to -1 to disable this feature and show the real player count.
 custom-player-count: -1
+
+# Set a custom number for the maximum player slots in the server list.
+# Set to -1 to use the server's default value from server.properties.
+custom-max-players: -1
