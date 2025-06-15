@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PCDCommand implements CommandExecutor, TabCompleter {
 
@@ -39,14 +38,33 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
 
         switch (subCommand) {
             case "set":
-                // ... (code for 'set' remains the same)
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /pcd set <number>");
+                    return true;
+                }
+                try {
+                    int newBaseCount = Integer.parseInt(args[1]);
+                    plugin.setCustomPlayerCount(newBaseCount);
+                    sender.sendMessage(ChatColor.GREEN + "Base player count has been set to: " + newBaseCount);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ChatColor.RED + "Invalid number provided.");
+                }
                 return true;
 
             case "setmax":
-                // ... (code for 'setmax' remains the same)
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /pcd setmax <number>");
+                    return true;
+                }
+                try {
+                    int newMaxCount = Integer.parseInt(args[1]);
+                    plugin.setCustomMaxPlayers(newMaxCount);
+                    sender.sendMessage(ChatColor.GREEN + "Custom max player count has been set to: " + newMaxCount);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ChatColor.RED + "Invalid number provided.");
+                }
                 return true;
 
-            // --- NEW: Handle the "hover" subcommand ---
             case "hover":
                 if (args.length < 2) {
                     sender.sendMessage(ChatColor.RED + "Usage: /pcd hover <list|add|remove|clear>");
@@ -56,16 +74,30 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
                 return true;
 
             case "stat":
-                // ... (updated 'stat' code below)
+                // --- THIS SECTION IS NOW FULLY RESTORED ---
                 int baseCount = plugin.getCustomPlayerCount();
                 int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
                 int maxPlayers = plugin.getCustomMaxPlayers();
                 List<String> hoverList = plugin.getCustomHoverList();
 
                 sender.sendMessage(ChatColor.GOLD + "--- PlayerCustomDisplay Stats ---");
-                // ... online count display ...
-                // ... max players display ...
 
+                // Display status for dynamic online count
+                if (baseCount < 0) {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom online count: " + ChatColor.RED + "Disabled");
+                } else {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom online count: " + ChatColor.GREEN + "Enabled");
+                    sender.sendMessage(ChatColor.AQUA + "  Displayed: " + ChatColor.WHITE + (baseCount + onlinePlayers) + ChatColor.GRAY + " (Base: " + baseCount + " + Online: " + onlinePlayers + ")");
+                }
+
+                // Display status for custom max players
+                if (maxPlayers < 0) {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom max players: " + ChatColor.RED + "Disabled");
+                } else {
+                    sender.sendMessage(ChatColor.YELLOW + "Custom max players: " + ChatColor.GREEN + "Enabled" + ChatColor.AQUA + " -> " + ChatColor.WHITE + maxPlayers);
+                }
+
+                // Display status for custom hover list
                 if (hoverList.isEmpty()) {
                     sender.sendMessage(ChatColor.YELLOW + "Custom hover list: " + ChatColor.RED + "Disabled");
                 } else {
@@ -79,7 +111,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // --- NEW: Helper method to manage hover commands ---
     private void handleHoverCommand(CommandSender sender, String[] args) {
         String hoverAction = args[1].toLowerCase();
         List<String> currentList = new ArrayList<>(plugin.getCustomHoverList());
@@ -102,7 +133,7 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 String textToAdd = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-                currentList.add(ChatColor.translateAlternateColorCodes('&', textToAdd));
+                currentList.add(textToAdd); // Don't translate colors here, main class does it.
                 plugin.setCustomHoverList(currentList);
                 sender.sendMessage(ChatColor.GREEN + "Added line to hover list.");
                 break;
@@ -148,7 +179,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setmax")) {
                 StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "-1"), completions);
             } else if (args[0].equalsIgnoreCase("hover")) {
-                // --- NEW: Tab completion for hover subcommands ---
                 StringUtil.copyPartialMatches(args[1], Arrays.asList("list", "add", "remove", "clear"), completions);
             }
         }
