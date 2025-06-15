@@ -5,6 +5,8 @@ A simple, lightweight Spigot/Paper plugin that allows server owners to display a
 ## 📖 Description
 
 PlayerCustomDisplay goes beyond just setting a static fake player count. It allows you to set a "base" number, and the plugin will dynamically add the current number of online players to it. This creates a realistic and lively player count that changes as players join and leave your server.
+![image](https://github.com/user-attachments/assets/7e494577-4c02-4516-9d18-493b1570faa3)
+
 
 ## ✨ Features
 
