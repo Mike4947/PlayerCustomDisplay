@@ -7,3 +7,9 @@ custom-player-count: -1
 # Set a custom number for the maximum player slots in the server list.
 # Set to -1 to use the server's default value from server.properties.
 custom-max-players: -1
+
+# Lines to show when a user hovers over the player count in the server list.
+# Supports color codes with '&'. Leave empty to show the default player list.
+player-hover-list:
+  - "&aWelcome to our awesome server!"
+  - "&7Dev - Mike4947"
