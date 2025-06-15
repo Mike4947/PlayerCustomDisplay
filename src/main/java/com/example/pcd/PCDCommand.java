@@ -30,7 +30,7 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: /pcd <set|setmax|hover|stat>");
+            sender.sendMessage(ChatColor.RED + "Usage: /pcd <set|setmax|hover|stat|reload>");
             return true;
         }
 
@@ -74,7 +74,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
                 return true;
 
             case "stat":
-                // --- THIS SECTION IS NOW FULLY RESTORED ---
                 int baseCount = plugin.getCustomPlayerCount();
                 int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
                 int maxPlayers = plugin.getCustomMaxPlayers();
@@ -82,7 +81,6 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage(ChatColor.GOLD + "--- PlayerCustomDisplay Stats ---");
 
-                // Display status for dynamic online count
                 if (baseCount < 0) {
                     sender.sendMessage(ChatColor.YELLOW + "Custom online count: " + ChatColor.RED + "Disabled");
                 } else {
@@ -90,14 +88,12 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(ChatColor.AQUA + "  Displayed: " + ChatColor.WHITE + (baseCount + onlinePlayers) + ChatColor.GRAY + " (Base: " + baseCount + " + Online: " + onlinePlayers + ")");
                 }
 
-                // Display status for custom max players
                 if (maxPlayers < 0) {
                     sender.sendMessage(ChatColor.YELLOW + "Custom max players: " + ChatColor.RED + "Disabled");
                 } else {
                     sender.sendMessage(ChatColor.YELLOW + "Custom max players: " + ChatColor.GREEN + "Enabled" + ChatColor.AQUA + " -> " + ChatColor.WHITE + maxPlayers);
                 }
 
-                // Display status for custom hover list
                 if (hoverList.isEmpty()) {
                     sender.sendMessage(ChatColor.YELLOW + "Custom hover list: " + ChatColor.RED + "Disabled");
                 } else {
@@ -105,14 +101,20 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
                 }
                 return true;
 
+            case "reload":
+                plugin.loadAllValues();
+                sender.sendMessage(ChatColor.GREEN + "PlayerCustomDisplay configuration has been reloaded!");
+                return true;
+
             default:
-                sender.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /pcd <set|setmax|hover|stat>");
+                sender.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /pcd <set|setmax|hover|stat|reload>");
                 return true;
         }
     }
 
     private void handleHoverCommand(CommandSender sender, String[] args) {
         String hoverAction = args[1].toLowerCase();
+        // Get a mutable copy of the current list
         List<String> currentList = new ArrayList<>(plugin.getCustomHoverList());
 
         switch (hoverAction) {
@@ -133,7 +135,9 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 String textToAdd = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-                currentList.add(textToAdd); // Don't translate colors here, main class does it.
+                // --- THIS IS THE FIX ---
+                // Translate color codes BEFORE adding the line to the list
+                currentList.add(ChatColor.translateAlternateColorCodes('&', textToAdd));
                 plugin.setCustomHoverList(currentList);
                 sender.sendMessage(ChatColor.GREEN + "Added line to hover list.");
                 break;
@@ -174,7 +178,7 @@ public class PCDCommand implements CommandExecutor, TabCompleter {
         final List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "setmax", "hover", "stat"), completions);
+            StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "setmax", "hover", "stat", "reload"), completions);
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setmax")) {
                 StringUtil.copyPartialMatches(args[1], Arrays.asList("100", "500", "-1"), completions);

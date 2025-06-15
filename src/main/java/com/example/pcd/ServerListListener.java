@@ -2,7 +2,6 @@ package com.example.pcd;
 
 import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import com.destroystokyo.paper.event.server.PaperServerListPingEvent.ListedPlayerInfo;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -20,14 +19,20 @@ public class ServerListListener implements Listener {
     @EventHandler
     public void onServerListPing(PaperServerListPingEvent event) {
         int baseCount = plugin.getCustomPlayerCount();
+        int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
+        // Calculate the number that will be displayed for the online player count
+        int dynamicPlayerCount = baseCount >= 0 ? baseCount + onlinePlayers : onlinePlayers;
+
         if (baseCount >= 0) {
-            int online = plugin.getServer().getOnlinePlayers().size();
-            event.setNumPlayers(baseCount + online);
+            event.setNumPlayers(dynamicPlayerCount);
         }
 
         int maxCount = plugin.getCustomMaxPlayers();
+        // Calculate the number that will be displayed for the max player count
+        int displayedMax = maxCount >= 0 ? maxCount : event.getMaxPlayers();
+
         if (maxCount >= 0) {
-            event.setMaxPlayers(maxCount);
+            event.setMaxPlayers(displayedMax);
         }
 
         List<String> hoverList = plugin.getCustomHoverList();
@@ -36,7 +41,13 @@ public class ServerListListener implements Listener {
             sample.clear();
 
             for (String line : hoverList) {
-                ListedPlayerInfo info = new ListedPlayerInfo(line, UUID.randomUUID());
+                // --- PLACEHOLDER REPLACEMENT LOGIC ---
+                String processedLine = line
+                        .replace("%online%", String.valueOf(dynamicPlayerCount))
+                        .replace("%max%", String.valueOf(displayedMax))
+                        .replace("%base_count%", String.valueOf(baseCount));
+
+                ListedPlayerInfo info = new ListedPlayerInfo(processedLine, UUID.randomUUID());
                 sample.add(info);
             }
         }

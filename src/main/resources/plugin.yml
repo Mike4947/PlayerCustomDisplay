@@ -3,15 +3,15 @@ version: '1.0'
 main: com.example.pcd.main
 api-version: '1.21'
 authors: [ Mike4947 ]
-description: Sets a custom player count in the server list.
+description: Customizes the server list display and tab list.
 
 commands:
   pcd:
     description: Main command for PlayerCustomDisplay.
-    usage: /pcd <set|stat>
+    usage: /pcd <set | setmax | hover | stat | reload>
     permission: playercustomdisplay.admin
 
 permissions:
   playercustomdisplay.admin:
-    description: Allows using the PCD commands.
+    description: Allows using all PlayerCustomDisplay commands.
     default: op

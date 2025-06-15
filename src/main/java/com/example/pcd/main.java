@@ -9,56 +9,45 @@ import java.util.stream.Collectors;
 
 public final class main extends JavaPlugin {
 
-    private int customPlayerCount = -1;
-    private int customMaxPlayers = -1;
-    // --- NEW: Add a variable for the hover list ---
-    private List<String> customHoverList = new ArrayList<>();
+    private int customPlayerCount;
+    private int customMaxPlayers;
+    private List<String> customHoverList;
 
     @Override
     public void onEnable() {
+        // This ensures the config file exists and loads default values if it's new
         saveDefaultConfig();
-        loadPlayerCount();
-        loadMaxPlayerCount();
-        // --- NEW: Load the hover list on startup ---
-        loadHoverList();
+        // This loads all values from the config into the plugin
+        loadAllValues();
 
-        PCDCommand pcdCommand = new PCDCommand(this);
-        getCommand("pcd").setExecutor(pcdCommand);
-        getCommand("pcd").setTabCompleter(pcdCommand);
+        // Register the command handler
+        getCommand("pcd").setExecutor(new PCDCommand(this));
 
+        // Register the event listener
         getServer().getPluginManager().registerEvents(new ServerListListener(this), this);
 
         getLogger().info("PlayerCustomDisplay has been enabled!");
     }
 
-    // --- NEW: Method to load the hover list ---
-    public void loadHoverList() {
+    /**
+     * Loads all values from the config.yml file into the plugin's variables.
+     * This is the method the /pcd reload command will call.
+     */
+    public void loadAllValues() {
+        this.customPlayerCount = getConfig().getInt("custom-player-count", -1);
+        this.customMaxPlayers = getConfig().getInt("custom-max-players", -1);
+        // This part loads the hover list and translates color codes
         this.customHoverList = getConfig().getStringList("player-hover-list").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line))
                 .collect(Collectors.toList());
     }
 
-    public void loadPlayerCount() {
-        this.customPlayerCount = getConfig().getInt("custom-player-count", -1);
-    }
+    // --- Getters for other classes to use ---
+    public int getCustomPlayerCount() { return customPlayerCount; }
+    public int getCustomMaxPlayers() { return customMaxPlayers; }
+    public List<String> getCustomHoverList() { return customHoverList; }
 
-    public void loadMaxPlayerCount() {
-        this.customMaxPlayers = getConfig().getInt("custom-max-players", -1);
-    }
-
-    public int getCustomPlayerCount() {
-        return customPlayerCount;
-    }
-
-    public int getCustomMaxPlayers() {
-        return customMaxPlayers;
-    }
-
-    // --- NEW: Getter for the hover list ---
-    public List<String> getCustomHoverList() {
-        return customHoverList;
-    }
-
+    // --- Setters for the commands to use ---
     public void setCustomPlayerCount(int count) {
         this.customPlayerCount = count;
         getConfig().set("custom-player-count", count);
@@ -71,10 +60,9 @@ public final class main extends JavaPlugin {
         saveConfig();
     }
 
-    // --- NEW: Setter for the hover list ---
     public void setCustomHoverList(List<String> list) {
         this.customHoverList = list;
-        // We need to save the list without the color codes translated back
+        // When saving, convert color codes back to the '&' format for the file
         List<String> toSave = list.stream()
                 .map(line -> line.replace('§', '&'))
                 .collect(Collectors.toList());
